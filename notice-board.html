@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#5B6EFF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Notice Board — Mechanical Dept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+
+/* ══════════════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════════════ */
+:root {
+  --bg:         #0D0F1E;
+  --bg2:        #131527;
+  --surface:    rgba(255,255,255,0.055);
+  --surface-h:  rgba(255,255,255,0.09);
+  --border:     rgba(255,255,255,0.09);
+  --border-h:   rgba(255,255,255,0.18);
+  --t1:         #F0F1FF;
+  --t2:         rgba(240,241,255,0.65);
+  --t3:         rgba(240,241,255,0.35);
+  --accent:     #5B6EFF;
+  --accent2:    #8B9BFF;
+  --live:       #10D68F;
+  --warn:       #F5A623;
+  --danger:     #FF5A5F;
+  --r:          15px;
+  --r-sm:       10px;
+  --sh:         0 8px 40px rgba(0,0,0,0.5);
+  --sh-sm:      0 4px 20px rgba(0,0,0,0.3);
+  --ease:       cubic-bezier(.4,0,.2,1);
+}
+
+[data-theme="light"] {
+  --bg:         #EEF0FF;
+  --bg2:        #E4E8FF;
+  --surface:    rgba(255,255,255,0.75);
+  --surface-h:  rgba(255,255,255,0.95);
+  --border:     rgba(91,110,255,0.14);
+  --border-h:   rgba(91,110,255,0.3);
+  --t1:         #0D0F1E;
+  --t2:         rgba(13,15,30,0.65);
+  --t3:         rgba(13,15,30,0.35);
+  --sh:         0 8px 40px rgba(91,110,255,0.14);
+  --sh-sm:      0 4px 20px rgba(91,110,255,0.09);
+}
+
+/* ══════════════════════════════════════
+   RESET & BASE
+══════════════════════════════════════ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Poppins',sans-serif;
+  background:var(--bg);
+  color:var(--t1);
+  min-height:100vh;
+  transition:background .4s,color .4s;
+  overflow-x:hidden;
+}
+
+/* Ambient glow blobs */
+body::before,body::after{
+  content:'';position:fixed;pointer-events:none;z-index:0;
+  border-radius:50%;filter:blur(80px);
+}
+body::before{
+  width:500px;height:500px;top:-200px;left:-150px;
+  background:rgba(91,110,255,0.12);
+}
+body::after{
+  width:400px;height:400px;bottom:-150px;right:-100px;
+  background:rgba(16,214,143,0.07);
+}
+
+/* ══════════════════════════════════════
+   HEADER
+══════════════════════════════════════ */
+header{
+  position:sticky;top:0;z-index:200;
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  background:rgba(13,15,30,0.82);
+  border-bottom:1px solid var(--border);
+}
+[data-theme="light"] header{background:rgba(238,240,255,0.88)}
+
+.hdr{
+  max-width:860px;margin:0 auto;
+  display:flex;align-items:center;gap:14px;
+  padding:12px 20px;
+}
+
+.hdr-brand{flex:1;min-width:0}
+.hdr-title{
+  font-size:1.2rem;font-weight:800;letter-spacing:-.5px;
+  line-height:1.1;white-space:nowrap;
+}
+.hdr-title em{font-style:normal;color:var(--accent2)}
+.hdr-dept{
+  display:inline-block;margin-top:3px;
+  font-size:.6rem;font-weight:600;letter-spacing:.5px;
+  color:var(--accent2);background:rgba(91,110,255,.13);
+  border:1px solid rgba(91,110,255,.25);
+  padding:2px 9px;border-radius:50px;
+}
+
+.hdr-clock{
+  text-align:center;flex-shrink:0;
+}
+.clock-t{
+  display:block;font-size:1.4rem;font-weight:700;
+  color:var(--accent2);letter-spacing:3px;
+  font-variant-numeric:tabular-nums;line-height:1;
+}
+.clock-d{
+  display:block;font-size:.6rem;color:var(--t3);margin-top:2px;
+}
+
+.hdr-btns{display:flex;gap:7px}
+.ib{
+  width:36px;height:36px;border-radius:9px;
+  border:1px solid var(--border);background:var(--surface);
+  color:var(--t2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.85rem;transition:all .2s var(--ease);
+  backdrop-filter:blur(8px);
+}
+.ib:hover{background:var(--surface-h);border-color:var(--accent);color:var(--accent2);transform:scale(1.05)}
+
+/* ══════════════════════════════════════
+   SEARCH BAR
+══════════════════════════════════════ */
+.search-wrap{
+  max-width:860px;margin:0 auto;
+  overflow:hidden;max-height:0;transition:max-height .35s var(--ease);
+}
+.search-wrap.open{max-height:70px}
+.search-wrap-inner{padding:0 20px 10px}
+.search-inp{
+  width:100%;padding:10px 18px;
+  border-radius:50px;border:1px solid var(--border);
+  background:var(--surface);color:var(--t1);
+  font-family:'Poppins',sans-serif;font-size:.85rem;
+  outline:none;transition:border-color .2s;
+}
+.search-inp:focus{border-color:var(--accent)}
+.search-inp::placeholder{color:var(--t3)}
+
+/* ══════════════════════════════════════
+   STATS BAR
+══════════════════════════════════════ */
+.stats{
+  max-width:860px;margin:16px auto;padding:0 20px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+  position:relative;z-index:1;
+}
+.stat{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:10px 8px;
+  backdrop-filter:blur(10px);text-align:center;
+  transition:transform .2s,border-color .2s;
+}
+.stat:hover{transform:translateY(-2px);border-color:var(--accent)}
+.stat i{font-size:.85rem;color:var(--accent2);display:block;margin-bottom:4px}
+.stat-lbl{font-size:.55rem;color:var(--t3);display:block;font-weight:500}
+.stat-val{font-size:.95rem;font-weight:700;display:block;line-height:1.2}
+
+/* ══════════════════════════════════════
+   MAIN LAYOUT
+══════════════════════════════════════ */
+main{
+  max-width:860px;margin:0 auto;
+  padding:0 20px 80px;
+  display:flex;flex-direction:column;gap:14px;
+  position:relative;z-index:1;
+}
+
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:18px;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  box-shadow:var(--sh-sm);
+}
+
+.sec-hdr{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:14px;
+}
+.sec-hdr h2{font-size:.92rem;font-weight:700;flex:1}
+
+.sec-ico{
+  width:30px;height:30px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;
+}
+.ico-blue{background:rgba(91,110,255,.2)}
+.ico-orange{background:rgba(245,166,35,.2)}
+.ico-green{background:rgba(16,214,143,.2)}
+
+/* ══════════════════════════════════════
+   LIVE HERO
+══════════════════════════════════════ */
+#liveHero{
+  border-radius:var(--r);padding:22px;
+  backdrop-filter:blur(12px);
+  transition:background .4s,border-color .4s,box-shadow .4s;
+}
+#liveHero.h-active{
+  background:linear-gradient(130deg,rgba(91,110,255,.13),rgba(16,214,143,.07));
+  border:1px solid rgba(16,214,143,.28);
+  box-shadow:0 0 50px rgba(16,214,143,.09);
+}
+#liveHero.h-break{
+  background:rgba(245,166,35,.07);
+  border:1px solid rgba(245,166,35,.22);
+}
+#liveHero.h-state{
+  background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  min-height:140px;
+}
+
+.live-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:.62rem;font-weight:700;letter-spacing:.8px;
+  color:var(--live);background:rgba(16,214,143,.1);
+  border:1px solid rgba(16,214,143,.28);
+  padding:3px 10px;border-radius:50px;margin-bottom:10px;
+}
+.pulse-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--live);
+  animation:pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(.75);opacity:.5}
+}
+
+.live-subj{
+  font-size:2.2rem;font-weight:800;letter-spacing:-1.5px;line-height:1;
+  margin-bottom:8px;
+}
+.live-meta{
+  display:flex;flex-wrap:wrap;gap:12px;
+  font-size:.78rem;color:var(--t2);margin-bottom:16px;
+}
+.live-meta span{display:flex;align-items:center;gap:5px}
+.live-meta i{color:var(--t3);font-size:.7rem}
+
+.prog-row{
+  display:flex;justify-content:space-between;
+  align-items:center;margin-bottom:6px;
+}
+.prog-row span{font-size:.72rem;color:var(--t2)}
+.prog-rem{font-size:.82rem;font-weight:700;color:var(--live)!important}
+.prog-wrap{
+  height:7px;background:rgba(255,255,255,.08);
+  border-radius:50px;overflow:hidden;margin-bottom:16px;
+}
+.prog-fill{
+  height:100%;border-radius:50px;
+  background:linear-gradient(90deg,var(--accent),var(--live));
+  transition:width 1s linear;
+}
+
+.next-box{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;
+  background:rgba(255,255,255,.04);
+  border-radius:var(--r-sm);border:1px solid var(--border);
+}
+.next-box .lbl{font-size:.62rem;color:var(--t3);display:block}
+.next-box .val{font-size:.82rem;font-weight:600;display:block}
+.next-box .cnt{
+  margin-left:auto;font-size:1.05rem;font-weight:800;
+  color:var(--warn);font-variant-numeric:tabular-nums;
+}
+
+.state-center{text-align:center;padding:16px 0}
+.state-center .emoji{font-size:2.6rem;display:block;margin-bottom:8px}
+.state-center h3{font-size:1.1rem;font-weight:700;margin-bottom:4px}
+.state-center p{font-size:.8rem;color:var(--t2)}
+
+/* ══════════════════════════════════════
+   TODAY'S SCHEDULE
+══════════════════════════════════════ */
+.sched-list{display:flex;flex-direction:column;gap:7px}
+
+.sched-item{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 13px;border-radius:var(--r-sm);
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.03);
+  transition:background .2s;
+}
+.sched-item:hover{background:var(--surface-h)}
+.sched-item.is-live{
+  border-color:rgba(16,214,143,.4)!important;
+  background:rgba(16,214,143,.07)!important;
+}
+.sched-item.is-done{opacity:.45}
+.sched-item.is-break{
+  background:rgba(245,166,35,.04);
+  border-color:rgba(245,166,35,.15);
+  padding:7px 13px;
+}
+.sched-item.is-lunch{
+  background:rgba(255,90,95,.04);
+  border-color:rgba(255,90,95,.15);
+  padding:7px 13px;
+}
+
+.per-num{
+  width:26px;height:26px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.68rem;font-weight:700;color:#fff;flex-shrink:0;
+}
+.per-time{
+  font-size:.67rem;color:var(--t3);min-width:95px;
+  font-variant-numeric:tabular-nums;
+}
+.per-info{flex:1;min-width:0}
+.per-subj{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.per-tchr{font-size:.62rem;color:var(--t3);margin-top:1px}
+.per-badge{
+  font-size:.6rem;font-weight:700;padding:3px 8px;
+  border-radius:50px;flex-shrink:0;text-transform:uppercase;letter-spacing:.5px;
+}
+.b-live{background:rgba(16,214,143,.14);color:var(--live);border:1px solid rgba(16,214,143,.28)}
+.b-done{background:rgba(255,255,255,.05);color:var(--t3)}
+.b-soon{background:rgba(91,110,255,.12);color:var(--accent2)}
+.b-break{background:rgba(245,166,35,.12);color:var(--warn)}
+
+/* ══════════════════════════════════════
+   WEEKLY TIMETABLE
+══════════════════════════════════════ */
+.day-tabs{
+  display:flex;gap:6px;overflow-x:auto;
+  padding-bottom:10px;margin-bottom:12px;scrollbar-width:none;
+}
+.day-tabs::-webkit-scrollbar{display:none}
+.dtab{
+  padding:6px 14px;border-radius:50px;
+  border:1px solid var(--border);background:var(--surface);
+  color:var(--t2);font-size:.72rem;font-weight:600;cursor:pointer;
+  white-space:nowrap;transition:all .2s;font-family:'Poppins',sans-serif;
+}
+.dtab:hover{border-color:var(--accent);color:var(--accent2)}
+.dtab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.dtab.is-today:not(.active){border-color:var(--live);color:var(--live)}
+
+.tt-wrap{display:flex;flex-direction:column;gap:6px}
+.tt-row{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 11px;border-radius:var(--r-sm);
+  background:rgba(255,255,255,.03);border:1px solid var(--border);
+  transition:background .2s;
+}
+.tt-row:hover{background:var(--surface-h)}
+.tt-row.tt-break{padding:5px 11px;opacity:.55;border-style:dashed}
+.tt-per{font-size:.62rem;color:var(--t3);min-width:20px;font-weight:700}
+.tt-time{font-size:.65rem;color:var(--t3);min-width:112px;font-variant-numeric:tabular-nums}
+.tt-chip{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+.tt-subj{font-size:.82rem;font-weight:600;flex:1}
+.tt-tchr{font-size:.65rem;color:var(--t3);min-width:90px}
+.tt-room{
+  font-size:.65rem;font-weight:600;padding:2px 8px;
+  border-radius:50px;background:rgba(255,255,255,.06);color:var(--t2);
+  flex-shrink:0;
+}
+
+.holiday-banner{
+  text-align:center;padding:28px;color:var(--t2);
+}
+.holiday-banner .e{font-size:2.4rem;display:block;margin-bottom:8px}
+
+.print-btn{
+  font-size:.68rem;font-weight:600;padding:5px 12px;
+  border-radius:50px;border:1px solid var(--border);
+  background:var(--surface);color:var(--t2);cursor:pointer;
+  display:flex;align-items:center;gap:5px;
+  transition:all .2s;font-family:'Poppins',sans-serif;
+}
+.print-btn:hover{border-color:var(--accent);color:var(--accent2)}
+
+/* ══════════════════════════════════════
+   NOTICES
+══════════════════════════════════════ */
+.filters{
+  display:flex;gap:6px;overflow-x:auto;
+  padding-bottom:10px;margin-bottom:12px;scrollbar-width:none;
+}
+.filters::-webkit-scrollbar{display:none}
+.fbtn{
+  padding:5px 14px;border-radius:50px;
+  border:1px solid var(--border);background:var(--surface);
+  color:var(--t2);font-size:.72rem;font-weight:500;cursor:pointer;
+  white-space:nowrap;transition:all .2s;font-family:'Poppins',sans-serif;
+}
+.fbtn:hover{border-color:var(--accent)}
+.fbtn.active{background:rgba(91,110,255,.18);border-color:var(--accent);color:var(--accent2);font-weight:600}
+
+.notice-card{
+  border:1px solid var(--border);border-radius:var(--r-sm);
+  margin-bottom:7px;overflow:hidden;cursor:pointer;
+  transition:border-color .2s;
+}
+.notice-card:hover{border-color:var(--border-h)}
+.nc-hdr{
+  padding:12px 13px;display:flex;align-items:flex-start;gap:9px;
+}
+.nc-pin{font-size:.75rem;color:var(--warn);flex-shrink:0;margin-top:2px}
+.nc-title{font-size:.86rem;font-weight:600;flex:1;line-height:1.3}
+.nc-meta{display:flex;align-items:center;gap:7px;margin-top:3px;flex-wrap:wrap}
+.nc-cat{
+  font-size:.58rem;font-weight:700;padding:2px 7px;
+  border-radius:50px;letter-spacing:.4px;
+}
+.cat-exam{background:rgba(255,90,95,.14);color:var(--danger);border:1px solid rgba(255,90,95,.25)}
+.cat-event{background:rgba(91,110,255,.14);color:var(--accent2);border:1px solid rgba(91,110,255,.25)}
+.cat-holiday{background:rgba(16,214,143,.12);color:var(--live);border:1px solid rgba(16,214,143,.22)}
+.cat-general{background:rgba(255,255,255,.07);color:var(--t2);border:1px solid var(--border)}
+.nc-date{font-size:.62rem;color:var(--t3)}
+.nc-chev{font-size:.7rem;color:var(--t3);transition:transform .3s var(--ease);flex-shrink:0}
+.notice-card.expanded .nc-chev{transform:rotate(180deg)}
+.nc-body{
+  padding:0 13px;max-height:0;overflow:hidden;
+  transition:max-height .4s var(--ease),padding .3s;
+}
+.notice-card.expanded .nc-body{max-height:200px;padding-bottom:13px}
+.nc-body p{
+  font-size:.8rem;color:var(--t2);line-height:1.65;
+  border-top:1px solid var(--border);padding-top:10px;
+}
+
+/* ══════════════════════════════════════
+   EXAMS
+══════════════════════════════════════ */
+.exam-card{
+  border:1px solid var(--border);border-radius:var(--r-sm);
+  margin-bottom:7px;overflow:hidden;cursor:pointer;
+  transition:border-color .2s;
+}
+.exam-card:hover{border-color:var(--border-h)}
+.exam-card.ex-today{
+  border-color:rgba(16,214,143,.4);
+  background:rgba(16,214,143,.05);
+}
+.exam-card.ex-expired{opacity:.45}
+.ex-hdr{
+  padding:11px 13px;display:flex;align-items:center;gap:10px;
+}
+.ex-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.ex-subj{font-size:.86rem;font-weight:600;flex:1}
+.ex-date{font-size:.7rem;color:var(--t2)}
+.ex-badge{
+  font-size:.62rem;font-weight:700;padding:3px 9px;
+  border-radius:50px;flex-shrink:0;
+}
+.eb-today{background:rgba(16,214,143,.18);color:var(--live);border:1px solid rgba(16,214,143,.4)}
+.eb-urgent{background:rgba(255,90,95,.14);color:var(--danger);border:1px solid rgba(255,90,95,.28)}
+.eb-soon{background:rgba(245,166,35,.14);color:var(--warn);border:1px solid rgba(245,166,35,.28)}
+.eb-upcoming{background:rgba(16,214,143,.1);color:var(--live);border:1px solid rgba(16,214,143,.2)}
+.eb-expired{background:rgba(255,255,255,.06);color:var(--t3);border:1px solid var(--border)}
+.ex-chev{font-size:.7rem;color:var(--t3);transition:transform .3s var(--ease)}
+.exam-card.expanded .ex-chev{transform:rotate(180deg)}
+.ex-body{
+  padding:0 13px;max-height:0;overflow:hidden;
+  transition:max-height .4s var(--ease),padding .3s;
+}
+.exam-card.expanded .ex-body{max-height:180px;padding-bottom:13px}
+.ex-notice-inner{
+  font-size:.8rem;color:var(--t2);line-height:1.65;
+  border-top:1px solid var(--border);padding-top:10px;
+}
+.ex-lbl{
+  display:block;font-size:.58rem;font-weight:700;
+  letter-spacing:.4px;color:var(--accent2);margin-bottom:4px;
+}
+
+/* ══════════════════════════════════════
+   VOTING & REPS
+══════════════════════════════════════ */
+.ldot{
+  display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--live);animation:pulse 1.5s ease infinite;
+  vertical-align:middle;margin-left:5px;
+}
+.empty{text-align:center;padding:20px;color:var(--t3);font-size:.82rem}
+
+.reps-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.rep-card{
+  display:flex;align-items:center;gap:11px;
+  padding:13px;border-radius:var(--r-sm);
+  border:1px solid var(--border);background:rgba(255,255,255,.03);
+  transition:all .2s;
+}
+.rep-card:hover{background:var(--surface-h);border-color:var(--accent);transform:translateY(-2px)}
+.rep-ava{
+  width:42px;height:42px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+}
+.rep-name{font-size:.82rem;font-weight:700;display:block}
+.rep-role{font-size:.62rem;color:var(--accent2);font-weight:600;display:block;margin-bottom:2px}
+.rep-phone{
+  display:flex;align-items:center;gap:4px;
+  font-size:.68rem;color:var(--t3);text-decoration:none;transition:color .2s;
+}
+.rep-phone:hover{color:var(--live)}
+
+/* ══════════════════════════════════════
+   TOAST
+══════════════════════════════════════ */
+.toast-box{
+  position:fixed;bottom:20px;right:16px;z-index:999;
+  display:flex;flex-direction:column;gap:7px;pointer-events:none;
+}
+.toast{
+  display:flex;align-items:center;gap:9px;
+  padding:11px 16px;border-radius:var(--r-sm);
+  font-size:.8rem;font-weight:500;max-width:280px;
+  pointer-events:auto;
+  transform:translateX(120px);opacity:0;
+  transition:all .3s var(--ease);
+  backdrop-filter:blur(20px);
+}
+.toast.show{transform:translateX(0);opacity:1}
+.toast.t-info{background:rgba(91,110,255,.92);color:#fff;border:1px solid rgba(91,110,255,.5)}
+.toast.t-ok{background:rgba(16,214,143,.88);color:#001a0d;border:1px solid rgba(16,214,143,.5)}
+.toast.t-warn{background:rgba(245,166,35,.9);color:#1a0d00;border:1px solid rgba(245,166,35,.5)}
+
+/* ══════════════════════════════════════
+   FOOTER
+══════════════════════════════════════ */
+footer{
+  text-align:center;padding:28px 20px;
+  color:var(--t3);font-size:.78rem;
+  position:relative;z-index:1;
+}
+.gtext{
+  font-weight:700;
+  background:linear-gradient(90deg,var(--accent),var(--live));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
+@media(max-width:620px){
+  .hdr-clock{display:none}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .reps-grid{grid-template-columns:1fr}
+  .live-subj{font-size:1.6rem}
+  .tt-tchr{display:none}
+  .per-tchr{display:none}
+}
+@media(max-width:420px){
+  .per-time{min-width:80px}
+}
+
+/* ══════════════════════════════════════
+   PRINT
+══════════════════════════════════════ */
+@media print{
+  header,.stats,#liveHero,.search-wrap,.filters,footer,.hdr-btns{display:none!important}
+  body{background:#fff;color:#000}
+  .card,.tt-row,.sched-item{border:1px solid #ccc;break-inside:avoid}
+  *{color:#000!important;background:transparent!important}
+}
+
+</style>
+</head>
+<body>
+
+<!-- Toast box -->
+<div class="toast-box" id="toastBox"></div>
+
+<!-- ══ HEADER ══ -->
+<header>
+  <div class="hdr">
+    <div class="hdr-brand">
+      <div class="hdr-title">📋 Notice <em>Board</em></div>
+      <span class="hdr-dept">Department of Mechanical</span>
+    </div>
+    <div class="hdr-clock">
+      <span class="clock-t" id="clockT">০০:০০:০০</span>
+      <span class="clock-d" id="clockD"></span>
+    </div>
+    <div class="hdr-btns">
+      <button class="ib" onclick="toggleSearch()" title="খুঁজুন"><i class="fas fa-search"></i></button>
+      <button class="ib" id="themeBtn" onclick="toggleTheme()" title="থিম"><i class="fas fa-moon"></i></button>
+    </div>
+  </div>
+</header>
+
+<!-- Search -->
+<div class="search-wrap" id="searchWrap">
+  <div class="search-wrap-inner">
+    <input id="searchInp" class="search-inp" type="text" placeholder="নোটিশ বা পরীক্ষা খুঁজুন..." oninput="onSearch(this.value)">
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat"><i class="fas fa-chalkboard-teacher"></i><span class="stat-lbl">আজকের ক্লাস</span><span class="stat-val" id="sClasses">৮</span></div>
+  <div class="stat"><i class="fas fa-clock"></i><span class="stat-lbl">চলতি পিরিয়ড</span><span class="stat-val" id="sPeriod">—</span></div>
+  <div class="stat"><i class="fas fa-calendar-check"></i><span class="stat-lbl">পরবর্তী পরীক্ষা</span><span class="stat-val" id="sExam">—</span></div>
+  <div class="stat"><i class="fas fa-bell"></i><span class="stat-lbl">নোটিশ</span><span class="stat-val" id="sNotices">৪</span></div>
+</div>
+
+<!-- Main -->
+<main>
+
+  <!-- LIVE HERO -->
+  <div id="liveHero"></div>
+
+  <!-- TODAY'S SCHEDULE -->
+  <div class="card">
+    <div class="sec-hdr">
+      <div class="sec-ico ico-orange">📅</div>
+      <h2>আজকের রুটিন</h2>
+      <span id="todayDayLbl" style="font-size:.72rem;color:var(--t3);font-weight:500;"></span>
+    </div>
+    <div class="sched-list" id="schedList"></div>
+  </div>
+
+  <!-- WEEKLY TIMETABLE -->
+  <div class="card" id="wkCard">
+    <div class="sec-hdr">
+      <div class="sec-ico ico-blue">📆</div>
+      <h2>সাপ্তাহিক রুটিন</h2>
+      <button class="print-btn" onclick="window.print()"><i class="fas fa-print"></i> প্রিন্ট</button>
+    </div>
+    <div class="day-tabs" id="dayTabs"></div>
+    <div class="tt-wrap" id="ttGrid"></div>
+  </div>
+
+  <!-- NOTICES -->
+  <div class="card">
+    <div class="sec-hdr">
+      <div class="sec-ico ico-blue">📢</div>
+      <h2>নোটিশ বোর্ড</h2>
+    </div>
+    <div class="filters" id="filterRow">
+      <button class="fbtn active" onclick="filterNotice('All',this)">সব</button>
+      <button class="fbtn" onclick="filterNotice('Exam',this)">পরীক্ষা</button>
+      <button class="fbtn" onclick="filterNotice('Event',this)">ইভেন্ট</button>
+      <button class="fbtn" onclick="filterNotice('Holiday',this)">ছুটি</button>
+      <button class="fbtn" onclick="filterNotice('General',this)">সাধারণ</button>
+    </div>
+    <div id="noticeBox"></div>
+  </div>
+
+  <!-- EXAMS -->
+  <div class="card">
+    <div class="sec-hdr">
+      <div class="sec-ico ico-orange">📝</div>
+      <h2>আসন্ন পরীক্ষা</h2>
+    </div>
+    <div id="examBox"></div>
+  </div>
+
+  <!-- VOTING -->
+  <div class="card">
+    <div class="sec-hdr">
+      <div class="sec-ico ico-green">🗳️</div>
+      <h2>লাইভ ভোটিং <span class="ldot"></span></h2>
+    </div>
+    <p class="empty">এখন কোনো ভোট চলছে না।</p>
+  </div>
+
+  <!-- REPRESENTATIVES -->
+  <div class="card">
+    <div class="sec-hdr">
+      <div class="sec-ico ico-blue">👥</div>
+      <h2>ক্লাস প্রতিনিধি</h2>
+    </div>
+    <div class="reps-grid" id="repsGrid"></div>
+  </div>
+
+</main>
+
+<footer>
+  <p>Developed by <span class="gtext">DEVELOPER TANVIR</span> &nbsp;•&nbsp; Department of Mechanical Engineering</p>
+</footer>
+
+<script>
+/* ══════════════════════════════════════
+   APP DATA
+══════════════════════════════════════ */
+
+const SUBJECTS = {
+  'Mathematics':        {color:'#FF6B6B', teacher:'ড. আহমেদ',      room:'১০১',         short:'MATH'},
+  'Physics':            {color:'#4ECDC4', teacher:'প্রফ. ইসলাম',   room:'১০২',         short:'PHY'},
+  'Chemistry':          {color:'#45B7D1', teacher:'ড. রহমান',       room:'ল্যাব-১',     short:'CHEM'},
+  'English':            {color:'#96CEB4', teacher:'মিস আক্তার',    room:'২০১',         short:'ENG'},
+  'Engineering Drawing':{color:'#F9CA24', teacher:'জনাব হাসান',    room:'ড্রইং হল',   short:'ED'},
+  'Workshop':           {color:'#DDA0DD', teacher:'জনাব আলী',      room:'ওয়ার্কশপ',  short:'WS'},
+  'Programming':        {color:'#5B6EFF', teacher:'জনাব করিম',     room:'ল্যাব-২',     short:'PROG'},
+  'Thermodynamics':     {color:'#FFA500', teacher:'ড. উদ্দিন',      room:'৩০১',         short:'THERMO'},
+  'Fluid Mechanics':    {color:'#85C1E9', teacher:'প্রফ. খান',     room:'৩০২',         short:'FM'},
+  'Machine Design':     {color:'#F1948A', teacher:'ড. চৌধুরী',     room:'৪০১',         short:'MD'},
+};
+
+// Working days: Sunday(0)–Thursday(4). Friday(5)=Holiday, Saturday(6)=Holiday
+const TIMETABLE = {
+  0: ['Mathematics','Physics','Chemistry','English','Engineering Drawing','Programming','Workshop','Thermodynamics'],
+  1: ['Fluid Mechanics','Machine Design','Mathematics','Physics','Chemistry','Engineering Drawing','Thermodynamics','Workshop'],
+  2: ['English','Programming','Physics','Mathematics','Fluid Mechanics','Chemistry','Machine Design','Workshop'],
+  3: ['Mathematics','Thermodynamics','Engineering Drawing','Chemistry','Physics','Workshop','Programming','English'],
+  4: ['Machine Design','Mathematics','Fluid Mechanics','Physics','Thermodynamics','Workshop','Chemistry','Engineering Drawing'],
+};
+
+const NOTICES = [
+  {id:1,pinned:true, cat:'General',title:'সবাই বাংলা বই নিয়া আইসো',
+   desc:'আগামীকালের বাংলা ক্লাসের জন্য সবাইকে তাদের বাংলা বই নিয়ে আসতে হবে। বই ছাড়া ক্লাসে প্রবেশ করা যাবে না। সকলের সহযোগিতা কামনা করা হচ্ছে।',
+   date:'2026-11-11'},
+  {id:2,pinned:true, cat:'Exam',  title:'কাল ইংরেজি পরীক্ষা',
+   desc:'আগামীকাল ইংরেজি পরীক্ষা অনুষ্ঠিত হবে। সবাইকে নির্ধারিত সময়ের ৩০ মিনিট আগে হলে আসতে হবে। অ্যাডমিট কার্ড ছাড়া প্রবেশ করা যাবে না।',
+   date:'2026-11-11'},
+  {id:3,pinned:false,cat:'Event', title:'বার্ষিক ক্রীড়া প্রতিযোগিতা',
+   desc:'আগামী সপ্তাহে বার্ষিক ক্রীড়া প্রতিযোগিতা অনুষ্ঠিত হবে। আগ্রহী শিক্ষার্থীরা তাদের নাম ক্লাস ক্যাপ্টেনের কাছে রেজিস্ট্রেশন করুন। প্রথম তিনজনকে পুরস্কার দেওয়া হবে।',
+   date:'2026-11-10'},
+  {id:4,pinned:false,cat:'Holiday',title:'১৬ ডিসেম্বর বিজয় দিবস ছুটি',
+   desc:'মহান বিজয় দিবস উপলক্ষে ১৬ ডিসেম্বর ২০২৬ তারিখে সকল ক্লাস বন্ধ থাকবে।',
+   date:'2026-11-09'},
+];
+
+const EXAMS = [
+  {id:1,subject:'English',  date:'2026-11-12',color:'#96CEB4',notice:'Oky — আজকে ইংরেজি পরীক্ষা! ৬ দিন ধরে প্রস্তুতি নিয়েছো তো? আজকাল ৬ দিনে ইংরেজি শিখে ফেলা যায়!'},
+  {id:2,subject:'Mathematics',date:'2026-11-20',color:'#FF6B6B',notice:'Math exam সমপর্কে: Chapter 3 ভালো করে পড়ে আসবা। প্রতিটি অধ্যায়ের সূত্রগুলো মুখস্থ করে আসতে হবে।'},
+  {id:3,subject:'ICT',       date:'2026-11-11',color:'#5B6EFF',notice:'সকালে exam আছে। সময়মতো আসতে হবে।'},
+  {id:4,subject:'BGS',       date:'2026-11-10',color:'#F1948A',notice:'এই exam সম্পর্কে এখনো কোনো notice দেওয়া হয়নি।'},
+];
+
+const REPS = [
+  {name:'Mohammad Sozib',role:'Class Captain',  phone:'01XXXXXXX8',emoji:'👨‍💼'},
+  {name:'Vice Captain',  role:'Vice Captain',   phone:'01XXXXXXXXX',emoji:'👨‍💼'},
+];
+
+const BN_DAYS = ['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
+const BN_MONTHS = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+
+/* ══════════════════════════════════════
+   TIME UTILITIES
+══════════════════════════════════════ */
+const bn  = n => String(n).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[+d]);
+const pad = n => String(n).padStart(2,'0');
+
+function minToStr(m){return `${pad(Math.floor(m/60))}:${pad(m%60)}`}
+function strToMin(s){const[h,m]=s.split(':').map(Number);return h*60+m}
+
+function nowSec(){const n=new Date();return n.getHours()*3600+n.getMinutes()*60+n.getSeconds()}
+function nowMin(){const n=new Date();return n.getHours()*60+n.getMinutes()}
+
+function fmtTime(str){
+  const[h,m]=str.split(':').map(Number);
+  const ap=h<12?'AM':'PM';const h12=h%12||12;
+  return `${bn(pad(h12))}:${bn(pad(m))} ${ap}`;
+}
+
+function fmtDate(ds){
+  const d=new Date(ds);
+  return `${bn(d.getDate())} ${BN_MONTHS[d.getMonth()].slice(0,5)} ${bn(d.getFullYear())}`;
+}
+
+function ordinal(n){
+  if(n===1)return'১ম';if(n===2)return'২য়';if(n===3)return'৩য়';return`${bn(n)}তম`;
+}
+
+/* ══════════════════════════════════════
+   SCHEDULE GENERATION
+   8:00 start, 35min periods
+   Short break (10min) after P2 & P6
+   Lunch break (30min) after P4
+══════════════════════════════════════ */
+function buildSlots(){
+  const s=[];let m=strToMin('08:00');
+  for(let i=1;i<=8;i++){
+    s.push({type:'class',period:i,startMin:m,endMin:m+35,startStr:minToStr(m),endStr:minToStr(m+35)});
+    m+=35;
+    if(i===2){s.push({type:'break',name:'☕ বিরতি',       startMin:m,endMin:m+10,startStr:minToStr(m),endStr:minToStr(m+10),dur:10});m+=10}
+    else if(i===4){s.push({type:'lunch',name:'🍱 দুপুরের বিরতি',startMin:m,endMin:m+30,startStr:minToStr(m),endStr:minToStr(m+30),dur:30});m+=30}
+    else if(i===6){s.push({type:'break',name:'☕ বিরতি',       startMin:m,endMin:m+10,startStr:minToStr(m),endStr:minToStr(m+10),dur:10});m+=10}
+  }
+  return s;
+}
+
+const SLOTS = buildSlots();
+const CLASS_SLOTS = SLOTS.filter(s=>s.type==='class');
+
+/* ══════════════════════════════════════
+   TODAY'S SUBJECTS
+══════════════════════════════════════ */
+function todaySubjects(){return TIMETABLE[new Date().getDay()]||[]}
+
+/* ══════════════════════════════════════
+   LIVE HERO RENDER (every second)
+══════════════════════════════════════ */
+function renderHero(){
+  const hero=document.getElementById('liveHero');
+  const day=new Date().getDay();
+  const cs=nowSec();const cm=nowMin();
+  const isHoliday=day===5||day===6;
+
+  if(isHoliday){
+    hero.className='h-state';
+    hero.innerHTML=`<div class="state-center"><span class="emoji">🏖️</span><h3>আজকে সাপ্তাহিক ছুটি</h3><p>শুক্রবার / শনিবার — কোনো ক্লাস নেই</p></div>`;
+    return;
+  }
+
+  const first=SLOTS[0];const last=SLOTS[SLOTS.length-1];
+
+  if(cm<first.startMin){
+    const rem=(first.startMin-cm)*60-(new Date().getSeconds());
+    const rm=Math.floor(rem/60);const rs=rem%60;
+    hero.className='h-state';
+    hero.innerHTML=`<div class="state-center"><span class="emoji">⏰</span><h3>ক্লাস শুরু হয়নি</h3><p>${fmtTime(first.startStr)} তে শুরু • ${bn(rm)}:${bn(pad(rs))} বাকি</p></div>`;
+    return;
+  }
+
+  if(cm>=last.endMin){
+    hero.className='h-state';
+    hero.innerHTML=`<div class="state-center"><span class="emoji">✅</span><h3>আজকের সব ক্লাস শেষ!</h3><p>দারুণ দিন ছিল, কাল আবার দেখা হবে 😊</p></div>`;
+    return;
+  }
+
+  for(const slot of SLOTS){
+    const ss=slot.startMin*60; const se=slot.endMin*60;
+    if(cs>=ss&&cs<se){
+      const total=se-ss; const elapsed=cs-ss; const rem=se-cs;
+      const prog=Math.min(100,Math.max(0,(elapsed/total)*100));
+      const rm=Math.floor(rem/60); const rs=rem%60;
+      const subs=todaySubjects();
+
+      if(slot.type==='class'){
+        const subj=subs[slot.period-1]||'ক্লাস';
+        const info=SUBJECTS[subj]||{};
+        const nxt=CLASS_SLOTS.find(p=>p.startMin>slot.startMin);
+        const nxtSubj=nxt?subs[nxt.period-1]||'—':'';
+
+        // Update progress bar if already rendered for this slot
+        const pf=document.getElementById('pFill');
+        if(pf){pf.style.width=prog+'%';return}  // only update fill to avoid flicker
+
+        hero.className='h-active';
+        hero.innerHTML=`
+          <div class="live-badge"><span class="pulse-dot"></span> LIVE &nbsp;•&nbsp; ${ordinal(slot.period)} পিরিয়ড</div>
+          <div class="live-subj" style="color:${info.color||'var(--t1)'};">${subj}</div>
+          <div class="live-meta">
+            <span><i class="fas fa-user-tie"></i> ${info.teacher||'—'}</span>
+            <span><i class="fas fa-door-open"></i> রুম ${info.room||'—'}</span>
+            <span><i class="fas fa-clock"></i> ${fmtTime(slot.startStr)} – ${fmtTime(slot.endStr)}</span>
+          </div>
+          <div class="prog-row">
+            <span>অগ্রগতি (${bn(Math.round(prog))}%)</span>
+            <span class="prog-rem">⏱ ${bn(rm)}:${bn(pad(rs))} বাকি</span>
+          </div>
+          <div class="prog-wrap"><div class="prog-fill" id="pFill" style="width:${prog}%"></div></div>
+          ${nxt?`<div class="next-box">
+            <div><span class="lbl">পরবর্তী ক্লাস</span><span class="val">${nxtSubj}</span></div>
+            <span style="font-size:.7rem;color:var(--t3)">${fmtTime(nxt.startStr)}</span>
+            <span class="cnt">${bn(rm)}:${bn(pad(rs))}</span>
+          </div>`:`<div class="next-box"><span class="val">🎉 এটিই আজকের শেষ ক্লাস</span></div>`}
+        `;
+      } else {
+        const nxt=CLASS_SLOTS.find(p=>p.startMin>=slot.endMin);
+        const nxtSubj=nxt?subs[nxt.period-1]||'—':'';
+        const pf=document.getElementById('pFill');
+        if(pf){pf.style.width=prog+'%';return}
+
+        hero.className='h-break';
+        hero.innerHTML=`
+          <div class="live-badge" style="color:var(--warn);background:rgba(245,166,35,.1);border-color:rgba(245,166,35,.28);">⏸ বিরতির সময়</div>
+          <div class="live-subj" style="color:var(--warn);font-size:1.6rem;">${slot.name}</div>
+          <div class="live-meta"><span><i class="fas fa-clock"></i> ${fmtTime(slot.startStr)} – ${fmtTime(slot.endStr)} (${bn(slot.dur)} মিনিট)</span></div>
+          <div class="prog-row">
+            <span>বিরতি শেষ হতে</span>
+            <span class="prog-rem" style="color:var(--warn)!important;">⏱ ${bn(rm)}:${bn(pad(rs))} বাকি</span>
+          </div>
+          <div class="prog-wrap">
+            <div class="prog-fill" id="pFill" style="width:${prog}%;background:linear-gradient(90deg,var(--warn),#ff6b6b);"></div>
+          </div>
+          ${nxt?`<div class="next-box">
+            <div><span class="lbl">পরবর্তী ক্লাস</span><span class="val">${nxtSubj}</span></div>
+            <span class="cnt" style="color:var(--warn)">${bn(rm)}:${bn(pad(rs))}</span>
+          </div>`:''}
+        `;
+      }
+      return;
+    }
+  }
+}
+
+/* ══════════════════════════════════════
+   UPDATE PROGRESS (every second, no re-render)
+══════════════════════════════════════ */
+function updateProgress(){
+  const cs=nowSec();const cm=nowMin();
+  for(const slot of SLOTS){
+    const ss=slot.startMin*60;const se=slot.endMin*60;
+    if(cs>=ss&&cs<se){
+      const total=se-ss;const elapsed=cs-ss;const rem=se-cs;
+      const prog=Math.min(100,Math.max(0,(elapsed/total)*100));
+      const rm=Math.floor(rem/60);const rs=rem%60;
+      const pf=document.getElementById('pFill');
+      if(pf)pf.style.width=prog+'%';
+      const remEl=document.querySelector('.prog-rem');
+      if(remEl)remEl.textContent=`⏱ ${bn(rm)}:${bn(pad(rs))} বাকি`;
+      const cntEl=document.querySelector('.cnt');
+      if(cntEl)cntEl.textContent=`${bn(rm)}:${bn(pad(rs))}`;
+      return;
+    }
+  }
+}
+
+/* ══════════════════════════════════════
+   TODAY'S SCHEDULE
+══════════════════════════════════════ */
+function renderSched(){
+  const list=document.getElementById('schedList');
+  const lbl=document.getElementById('todayDayLbl');
+  const day=new Date().getDay();
+  lbl.textContent=BN_DAYS[day];
+  const cm=nowMin();const subs=todaySubjects();
+  const isHoliday=day===5||day===6;
+  let h='';
+
+  for(const slot of SLOTS){
+    if(slot.type==='class'){
+      const subj=subs[slot.period-1]||'ক্লাস';
+      const info=SUBJECTS[subj]||{};
+      const live=!isHoliday&&cm>=slot.startMin&&cm<slot.endMin;
+      const done=!isHoliday&&cm>=slot.endMin;
+      let cl='sched-item';let badge='';
+      if(isHoliday){badge=`<span class="per-badge b-break">ছুটি</span>`}
+      else if(live){cl+=' is-live';badge=`<span class="per-badge b-live">🔴 LIVE</span>`}
+      else if(done){cl+=' is-done';badge=`<span class="per-badge b-done">✅ শেষ</span>`}
+      else{badge=`<span class="per-badge b-soon">🔜 আসছে</span>`}
+
+      h+=`<div class="${cl}" id="p${slot.period}">
+        <div class="per-num" style="background:${info.color||'var(--accent)'}">${bn(slot.period)}</div>
+        <div class="per-time">${fmtTime(slot.startStr)}–${fmtTime(slot.endStr)}</div>
+        <div class="per-info">
+          <div class="per-subj">${subj}</div>
+          <div class="per-tchr">${info.teacher||''} &bull; ${info.room||''}</div>
+        </div>
+        ${badge}
+      </div>`;
+    } else {
+      h+=`<div class="sched-item ${slot.type==='lunch'?'is-lunch':'is-break'}">
+        <div style="font-size:.7rem;color:var(--t3);min-width:95px;font-variant-numeric:tabular-nums;">${fmtTime(slot.startStr)}–${fmtTime(slot.endStr)}</div>
+        <div style="flex:1;font-size:.78rem;color:var(--t3);font-weight:500;">${slot.name}</div>
+        <span class="per-badge b-break">${bn(slot.dur)} মিনিট</span>
+      </div>`;
+    }
+  }
+  list.innerHTML=h;
+
+  setTimeout(()=>{
+    const el=document.querySelector('.is-live');
+    if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+  },400);
+}
+
+/* ══════════════════════════════════════
+   WEEKLY TIMETABLE
+══════════════════════════════════════ */
+function renderDayTabs(){
+  const c=document.getElementById('dayTabs');
+  const today=new Date().getDay();
+  c.innerHTML=[0,1,2,3,4,5,6].map(d=>{
+    const isHol=d===5||d===6;
+    return `<button class="dtab ${d===today?'active is-today':''}" onclick="showDay(${d},this)">
+      ${BN_DAYS[d]}${isHol?' 🏖':''}
+    </button>`;
+  }).join('');
+  showDay(today);
+}
+
+function showDay(dayIdx,btn){
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  else{const tabs=document.querySelectorAll('.dtab');if(tabs[dayIdx])tabs[dayIdx].classList.add('active')}
+
+  const grid=document.getElementById('ttGrid');
+  const isHol=dayIdx===5||dayIdx===6;
+  if(isHol){
+    grid.innerHTML=`<div class="holiday-banner"><span class="e">🏖️</span><p>সাপ্তাহিক ছুটির দিন</p></div>`;
+    return;
+  }
+
+  const subs=TIMETABLE[dayIdx]||[];
+  let h=`<div class="tt-row" style="opacity:.4;border-bottom:1px solid var(--border);margin-bottom:4px;">
+    <span class="tt-per">#</span>
+    <span class="tt-time">সময়</span>
+    <span style="display:flex;align-items:center;gap:7px;flex:1;font-size:.6rem;color:var(--t3);">বিষয়</span>
+    <span class="tt-tchr" style="font-size:.6rem;color:var(--t3);">শিক্ষক</span>
+    <span class="tt-room" style="font-size:.6rem;color:var(--t3);">রুম</span>
+  </div>`;
+
+  for(const slot of SLOTS){
+    if(slot.type==='class'){
+      const subj=subs[slot.period-1]||'—';
+      const info=SUBJECTS[subj]||{};
+      h+=`<div class="tt-row">
+        <span class="tt-per">${bn(slot.period)}</span>
+        <span class="tt-time">${fmtTime(slot.startStr)}–${fmtTime(slot.endStr)}</span>
+        <div style="display:flex;align-items:center;gap:7px;flex:1;">
+          <div class="tt-chip" style="background:${info.color||'#888'}"></div>
+          <span class="tt-subj">${subj}</span>
+        </div>
+        <span class="tt-tchr">${info.teacher||'—'}</span>
+        <span class="tt-room">${info.room||'—'}</span>
+      </div>`;
+    } else {
+      h+=`<div class="tt-row tt-break">
+        <span class="tt-per">—</span>
+        <span class="tt-time">${fmtTime(slot.startStr)}–${fmtTime(slot.endStr)}</span>
+        <span class="tt-subj" style="color:var(--t3);font-weight:400;">${slot.name}</span>
+        <span class="tt-room">${bn(slot.dur)} মিনিট</span>
+      </div>`;
+    }
+  }
+  grid.innerHTML=h;
+}
+
+/* ══════════════════════════════════════
+   NOTICES
+══════════════════════════════════════ */
+let curFilter='All', curSearch='';
+
+function renderNotices(){
+  const box=document.getElementById('noticeBox');
+  const catMap={Exam:'পরীক্ষা',Event:'ইভেন্ট',Holiday:'ছুটি',General:'সাধারণ'};
+  let list=[...NOTICES].filter(n=>{
+    const mf=curFilter==='All'||n.cat===curFilter;
+    const ms=!curSearch||n.title.toLowerCase().includes(curSearch.toLowerCase())||n.desc.toLowerCase().includes(curSearch.toLowerCase());
+    return mf&&ms;
+  }).sort((a,b)=>a.pinned===b.pinned?new Date(b.date)-new Date(a.date):b.pinned-a.pinned);
+
+  if(!list.length){box.innerHTML=`<p class="empty">কোনো নোটিশ পাওয়া যায়নি।</p>`;return}
+
+  box.innerHTML=list.map(n=>`
+    <div class="notice-card" id="nc${n.id}" onclick="toggleEl('nc${n.id}')">
+      <div class="nc-hdr">
+        ${n.pinned?'<i class="fas fa-thumbtack nc-pin"></i>':''}
+        <div style="flex:1">
+          <div class="nc-title">${n.title}</div>
+          <div class="nc-meta">
+            <span class="nc-cat cat-${n.cat.toLowerCase()}">${catMap[n.cat]||n.cat}</span>
+            <span class="nc-date"><i class="fas fa-calendar" style="font-size:.6rem"></i> ${fmtDate(n.date)}</span>
+          </div>
+        </div>
+        <i class="fas fa-chevron-down nc-chev"></i>
+      </div>
+      <div class="nc-body"><p>${n.desc}</p></div>
+    </div>`).join('');
+
+  document.getElementById('sNotices').textContent=bn(NOTICES.length);
+}
+
+function filterNotice(cat,btn){
+  curFilter=cat;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderNotices();
+}
+
+/* ══════════════════════════════════════
+   EXAMS
+══════════════════════════════════════ */
+function renderExams(){
+  const box=document.getElementById('examBox');
+  const today=new Date();today.setHours(0,0,0,0);
+
+  let list=[...EXAMS].filter(e=>!curSearch||e.subject.toLowerCase().includes(curSearch.toLowerCase()))
+    .sort((a,b)=>new Date(a.date)-new Date(b.date));
+
+  box.innerHTML=list.map(e=>{
+    const ed=new Date(e.date);ed.setHours(0,0,0,0);
+    const diff=Math.round((ed-today)/864e5);
+    let badge='',cl='exam-card';
+
+    if(diff<0){badge=`<span class="ex-badge eb-expired">✅ সম্পন্ন</span>`;cl+=' ex-expired'}
+    else if(diff===0){badge=`<span class="ex-badge eb-today">🎯 আজকে!</span>`;cl+=' ex-today'}
+    else if(diff<=3){badge=`<span class="ex-badge eb-urgent">🔴 ${bn(diff)} দিন</span>`}
+    else if(diff<=7){badge=`<span class="ex-badge eb-soon">🟠 ${bn(diff)} দিন</span>`}
+    else{badge=`<span class="ex-badge eb-upcoming">🟢 ${bn(diff)} দিন</span>`}
+
+    return `<div class="${cl}" id="ex${e.id}" onclick="toggleEl('ex${e.id}')">
+      <div class="ex-hdr">
+        <div class="ex-dot" style="background:${e.color}"></div>
+        <div style="flex:1">
+          <div class="ex-subj">${e.subject}</div>
+          <div class="ex-date"><i class="fas fa-calendar-alt" style="font-size:.62rem"></i> ${fmtDate(e.date)}</div>
+        </div>
+        ${badge}
+        <i class="fas fa-chevron-down ex-chev"></i>
+      </div>
+      <div class="ex-body">
+        <div class="ex-notice-inner">
+          <span class="ex-lbl">📋 পরীক্ষার নোটিশ</span>
+          ${e.notice}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Update next exam stat
+  const up=list.filter(e=>{const d=new Date(e.date);d.setHours(0,0,0,0);return d>=today});
+  if(up.length){
+    const nxt=up[0];const d=new Date(nxt.date);d.setHours(0,0,0,0);
+    const diff=Math.round((d-today)/864e5);
+    document.getElementById('sExam').textContent=diff===0?'আজকে!':`${bn(diff)} দিন`;
+  } else {
+    document.getElementById('sExam').textContent='নেই';
+  }
+}
+
+/* ══════════════════════════════════════
+   EXPAND / COLLAPSE
+══════════════════════════════════════ */
+function toggleEl(id){
+  const el=document.getElementById(id);
+  if(el)el.classList.toggle('expanded');
+}
+
+/* ══════════════════════════════════════
+   REPRESENTATIVES
+══════════════════════════════════════ */
+function renderReps(){
+  document.getElementById('repsGrid').innerHTML=REPS.map(r=>`
+    <div class="rep-card">
+      <div class="rep-ava">${r.emoji}</div>
+      <div>
+        <span class="rep-name">${r.name}</span>
+        <span class="rep-role">${r.role}</span>
+        <a href="tel:${r.phone}" class="rep-phone"><i class="fas fa-phone" style="font-size:.62rem"></i> ${r.phone}</a>
+      </div>
+    </div>`).join('');
+}
+
+/* ══════════════════════════════════════
+   CLOCK
+══════════════════════════════════════ */
+function updateClock(){
+  const n=new Date();
+  document.getElementById('clockT').textContent=`${bn(pad(n.getHours()))}:${bn(pad(n.getMinutes()))}:${bn(pad(n.getSeconds()))}`;
+  document.getElementById('clockD').textContent=`${BN_DAYS[n.getDay()]}, ${bn(n.getDate())} ${BN_MONTHS[n.getMonth()]}`;
+}
+
+/* ══════════════════════════════════════
+   STATS
+══════════════════════════════════════ */
+function updateStats(){
+  const day=new Date().getDay();const cm=nowMin();
+  const isHol=day===5||day===6;
+  document.getElementById('sClasses').textContent=isHol?'০':bn(CLASS_SLOTS.length);
+  if(isHol){document.getElementById('sPeriod').textContent='ছুটি';return}
+  let per='—';
+  for(const s of CLASS_SLOTS){if(cm>=s.startMin&&cm<s.endMin){per=ordinal(s.period);break}}
+  document.getElementById('sPeriod').textContent=per;
+}
+
+/* ══════════════════════════════════════
+   TOAST
+══════════════════════════════════════ */
+function toast(msg,type='info'){
+  const box=document.getElementById('toastBox');
+  const el=document.createElement('div');
+  el.className=`toast t-${type}`;
+  el.textContent=msg;
+  box.appendChild(el);
+  setTimeout(()=>el.classList.add('show'),50);
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400)},3200);
+}
+
+/* ══════════════════════════════════════
+   CLASS CHANGE ALERT
+══════════════════════════════════════ */
+let _lastSlotKey=null;
+function checkChange(){
+  const cm=nowMin();
+  for(const s of SLOTS){
+    if(cm>=s.startMin&&cm<s.endMin){
+      const key=`${s.type}-${s.startMin}`;
+      if(_lastSlotKey!==null&&_lastSlotKey!==key){
+        if(s.type==='class'){
+          const subj=todaySubjects()[s.period-1]||'ক্লাস';
+          toast(`📚 ${ordinal(s.period)} পিরিয়ড: ${subj}`,'info');
+        } else {
+          toast(`${s.name} শুরু হয়েছে (${bn(s.dur)} মিনিট)`,'warn');
+        }
+      }
+      _lastSlotKey=key;
+      return;
+    }
+  }
+}
+
+/* ══════════════════════════════════════
+   SEARCH
+══════════════════════════════════════ */
+let _searchOpen=false;
+function toggleSearch(){
+  _searchOpen=!_searchOpen;
+  document.getElementById('searchWrap').classList.toggle('open',_searchOpen);
+  if(_searchOpen)setTimeout(()=>document.getElementById('searchInp').focus(),200);
+}
+function onSearch(v){curSearch=v;renderNotices();renderExams()}
+
+/* ══════════════════════════════════════
+   THEME
+══════════════════════════════════════ */
+function toggleTheme(){
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  const next=isDark?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  document.getElementById('themeBtn').innerHTML=next==='dark'?'<i class="fas fa-moon"></i>':'<i class="fas fa-sun"></i>';
+  localStorage.setItem('nbTheme',next);
+}
+
+/* ══════════════════════════════════════
+   MAIN TICK (every 1 second)
+══════════════════════════════════════ */
+let _tick=0;
+function tick(){
+  updateClock();
+  updateStats();
+  checkChange();
+  if(_tick%1===0) updateProgress(); // try fast update first
+  if(_tick%2===0) renderHero();     // full re-render every 2s if needed
+  if(_tick%30===0){renderSched();renderExams()} // schedule every 30s
+  _tick++;
+}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+function init(){
+  // Restore theme
+  const saved=localStorage.getItem('nbTheme')||'dark';
+  document.documentElement.setAttribute('data-theme',saved);
+  document.getElementById('themeBtn').innerHTML=saved==='dark'?'<i class="fas fa-moon"></i>':'<i class="fas fa-sun"></i>';
+
+  // Initial renders
+  renderHero();
+  renderSched();
+  renderDayTabs();
+  renderNotices();
+  renderExams();
+  renderReps();
+  updateClock();
+  updateStats();
+
+  // Live tick
+  setInterval(tick,1000);
+
+  // Welcome
+  setTimeout(()=>toast('👋 Notice Board লোড হয়েছে!','ok'),800);
+}
+
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
